@@ -1,0 +1,67 @@
+PART 1:
+=======================
+https://medium.com/@bhagiasheri24/deep-dive-into-elastic-kubernetes-service-eks-infrastructure-and-configuration-steps-part-i-9fee25d9f423
+
+PART 2:
+=======================
+https://medium.com/@bhagiasheri24/ecr-image-deployment-on-eks-part-2-2b4c0b0411f2
+
+
+aws eks describe-cluster --region ap-south-1 --name eks-test-2 --query cluster.status
+
+
+Let’s configure our local machine to communicate with this cluster using the below command:
+============================
+aws eks update-kubeconfig --region ap-south-1 --name eks-test-2
+
+=================
+Now our cluster has been configured in our local machine, let’s test it using this command:
+=================================
+kubectl get svc
+
+kubectl get nodes --watch
+
+
+Create a Repository in ECR Service using the below command:
+===============================
+aws ecr create-repository --repository-name <repo-name> --region <region-code>
+aws ecr create-repository --repository-name eks-test-repo-3 --region ap-south-1
+
+To deploy the image on the repository, retrieve an authentication token and authenticate your Docker client to your registry
+========================
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 415667570344.dkr.ecr.ap-south-1.amazonaws.com
+
+
+The build is successful, now tag your image so you can push the image to this repository:
+=====================
+aws ecr create-repository --repository-name my-image --region ap-south-1
+docker build -t my-image .
+docker tag my-image:latest 415667570344.dkr.ecr.ap-south-1.amazonaws.com/my-image:latest
+docker push 415667570344.dkr.ecr.ap-south-1.amazonaws.com/my-image:latest
+
+
+ kubectl create namespace test-deployment
+ 
+ kubectl apply -f deployment.yaml
+
+
+kubectl -n <namespace-name> describe service <service-name>
+
+kubectl -n test-deployment describe service eks-test
+
+
+EKS Config=
+----------------------------------------------------------------
+aws ecr create-repository --repository-name cluster-agent-repo --region ap-south-1
+
+docker build -t cluster-agent:latest .
+
+$ docker tag appdynamics/cluster-agent:latest 415667570344.dkr.ecr.ap-south-1.amazonaws.com/cluster-agent:latest
+docker tag test-image:latest 415667570344.dkr.ecr.ap-south-1.amazonaws.com/test-image:latest
+
+docker push 415667570344.dkr.ecr.ap-south-1.amazonaws.com/cluster-agent:latest
+
+
+
+
+docker run -e "JAVA_TOOL_OPTIONS=-javaagent:appagent/javaagent.jar" -p 8080:8080 --name eks-test-3 eks-test
